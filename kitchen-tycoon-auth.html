@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kitchen Tycoon</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+:root{
+  --primary:#f97316; --primary-d:#ea580c; --green:#16a34a; --green-l:#22c55e;
+  --bg:#0f0f13; --card:#1c1c24; --text:#f8fafc; --muted:#94a3b8; --accent:#3b82f6;
+}
+body.theme-blinkit{--primary:#f8c301;--primary-d:#e0b000;--accent:#f8c301}
+body.theme-swiggy{--primary:#fc8019;--primary-d:#e56e0a;--accent:#fc8019}
+body.theme-zomato{--primary:#e23744;--primary-d:#c62828;--accent:#e23744}
+body.theme-instamart{--primary:#6b21a8;--primary-d:#581c87;--accent:#6b21a8}
+body.theme-dominos{--primary:#0b648f;--primary-d:#084b6b;--accent:#0b648f}
+body.theme-mcdonalds{--primary:#ffc72c;--primary-d:#e6b400;--accent:#ffc72c}
+body.theme-pizzahut{--primary:#ee3a23;--primary-d:#d32f1a;--accent:#ee3a23}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background 0.4s}
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-d));padding:8px 12px 10px;text-align:center;transition:all 0.4s}
+.header h1{font-size:1.05rem;font-weight:800}
+.header p{font-size:0.68rem;opacity:0.9;margin-top:1px}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:0.7rem;gap:6px;flex-wrap:wrap}
+.score-bar{display:flex;justify-content:space-around;background:var(--card);margin:6px 10px;border-radius:10px;padding:7px 4px;font-size:0.75rem;font-weight:600}
+.score-bar span{color:var(--primary);transition:all 0.25s}
+.score-up{color:#22c55e !important;transform:scale(1.25);text-shadow:0 0 10px rgba(34,197,94,0.6)}
+.score-down{color:#ef4444 !important;transform:scale(1.15)}
+.score-arrow{font-size:0.7rem;margin-left:2px;opacity:0;transition:opacity 0.3s}
+.score-arrow.show{opacity:1}
+.social-toast{position:fixed;top:12px;right:10px;background:rgba(28,28,36,0.96);border:1px solid #22c55e;border-radius:10px;padding:8px 12px;font-size:0.72rem;z-index:55;opacity:0;transform:translateX(30px);transition:all 0.4s;max-width:200px;pointer-events:none}
+.social-toast.show{opacity:1;transform:translateX(0)}
+.social-toast .name{color:#22c55e;font-weight:700}
+.rank{text-align:center;font-size:0.68rem;color:var(--green-l);margin:2px 0 6px;font-weight:600}
+.order-box{background:linear-gradient(135deg,#15803d,#16a34a);margin:0 10px 10px;border-radius:12px;padding:10px;text-align:center;border:2px solid #4ade80}
+.order-box .label{font-size:0.85rem;font-weight:700}
+.order-box .dish{font-size:1.8rem;font-weight:800;margin:6px 0;display:flex;align-items:center;justify-content:center;gap:10px}
+.timer-bar{height:4px;background:rgba(0,0,0,0.25);border-radius:3px;margin-top:6px;overflow:hidden}
+.timer-fill{height:100%;background:#fbbf24;width:100%;transition:width 0.1s linear}
+.stations{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 10px 12px}
+.station{background:var(--card);border:2px solid #334155;border-radius:12px;padding:10px 4px;text-align:center;cursor:pointer;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.station:active{transform:scale(0.95);border-color:var(--primary)}
+.station-icon{font-size:3.4rem;line-height:1}
+.station-icon img{width:52px;height:52px;object-fit:contain;display:block;margin:0 auto}
+.station-name{font-size:0.82rem;font-weight:700;margin-top:4px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(15,15,19,0.97);border-top:1px solid #334155;padding:7px 6px;display:flex;justify-content:space-around;gap:4px;z-index:30;flex-wrap:wrap}
+.btn{background:var(--card);border:1px solid #334155;color:var(--text);padding:6px 8px;border-radius:8px;font-size:0.62rem;font-weight:600;cursor:pointer}
+.btn.wa{background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff}
+.btn.share{background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;color:#fff}
+.btn.highlight{animation:pulse 1s infinite;border:2px solid #3b82f6;box-shadow:0 0 12px #3b82f6}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.toast{position:fixed;bottom:65px;left:50%;transform:translateX(-50%) translateY(15px);background:#1e293b;border:1px solid #334155;padding:8px 12px;border-radius:8px;font-size:0.72rem;z-index:50;opacity:0;transition:all 0.25s;max-width:90%;text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;z-index:100;padding:14px}
+.modal.show{display:flex}
+.modal-box{background:#1c1c24;border:1px solid #334155;border-radius:14px;padding:16px 14px;width:100%;max-width:340px;text-align:center;max-height:90vh;overflow-y:auto}
+.modal-box h2{font-size:1.05rem;color:var(--primary);margin-bottom:6px}
+.modal-box p{font-size:0.74rem;color:var(--muted);margin-bottom:6px;line-height:1.35}
+.input-g{margin:7px 0;text-align:left}
+.input-g label{font-size:0.66rem;color:var(--muted);display:block;margin-bottom:2px}
+.input-g input,.input-g select{width:100%;padding:8px;border-radius:8px;border:1px solid #334155;background:#0f0f13;color:var(--text);font-size:0.82rem}
+.btn-main{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;border:none;padding:10px;border-radius:9px;font-weight:700;font-size:0.82rem;width:100%;margin-top:7px;cursor:pointer}
+.ach{position:fixed;top:16%;left:50%;transform:translateX(-50%) scale(0.85);background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1c1917;padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.8rem;z-index:60;opacity:0;transition:all 0.35s;pointer-events:none;text-align:center}
+.ach.show{opacity:1;transform:translateX(-50%) scale(1)}
+.order-float{
+  position:fixed;top:48px;left:4px;transform:scale(0.95);
+  background:rgba(15,15,25,0.97);border:2px solid #a855f7;
+  border-radius:14px;padding:12px 14px;font-size:0.85rem;z-index:40;
+  display:none;width:auto;max-width:200px;box-shadow:0 0 20px rgba(168,85,247,0.45);
+  transition:all 0.3s cubic-bezier(0.2,0.8,0.2,1);
+}
+.order-float.show{display:block;transform:scale(1)}
+.order-float.minimized{
+  top:48px;left:4px;transform:none;width:auto;max-width:145px;padding:6px 8px;
+  border-radius:10px;font-size:0.65rem;
+}
+.order-float select{width:100%;margin-top:5px;padding:6px;font-size:0.72rem;border-radius:7px;background:#0f0f13;color:#fff;border:1px solid #a855f7}
+.order-float.minimized select{padding:5px;font-size:0.68rem}
+.neon-text{
+  font-weight:800;font-size:0.9rem;
+  background:linear-gradient(90deg,#22d3ee,#e879f9,#22d3ee);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:neonMove 2s linear infinite, neonPulse 1.5s ease-in-out infinite;
+  text-align:center;
+}
+.order-float.minimized .neon-text{font-size:0.72rem}
+@keyframes neonMove{0%{background-position:0% center}100%{background-position:200% center}}
+@keyframes neonPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+.rotating-emoji{font-size:1.6rem;text-align:center;margin:5px 0;transition:all 0.3s}
+.order-float.minimized .rotating-emoji{font-size:1.15rem;margin:2px 0}
+.platform-text{text-align:center;font-size:0.75rem;color:#a5b4fc;margin-top:2px;min-height:18px}
+.order-float.minimized .platform-text{font-size:0.65rem}
+.close-btn{
+  background:#ef4444;border:none;color:#fff;width:28px;height:28px;border-radius:50%;
+  font-size:1rem;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.order-float.minimized .close-btn{width:22px;height:22px;font-size:0.8rem}
+
+.visitor{text-align:center;font-size:0.58rem;color:var(--muted);padding:2px}
+body.flash-blue{background:#0c1a2e !important}
+body.flash-blue .header{background:linear-gradient(135deg,#3b82f6,#1d4ed8)!important}
+
+.btn.wa{
+  background:linear-gradient(135deg,#25d366,#128c7e);border:2px solid #4ade80;
+  color:#fff;box-shadow:0 0 10px rgba(74,222,128,0.5),0 0 20px rgba(37,211,102,0.25);
+  animation:neonGreen 2s ease-in-out infinite;
+}
+.btn.share{
+  background:linear-gradient(135deg,#6366f1,#4f46e5);border:2px solid #a78bfa;
+  color:#fff;box-shadow:0 0 10px rgba(167,139,250,0.5),0 0 20px rgba(99,102,241,0.25);
+  animation:neonPurple 2s ease-in-out infinite;
+}
+@keyframes neonGreen{
+  0%,100%{box-shadow:0 0 8px rgba(74,222,128,0.4),0 0 16px rgba(37,211,102,0.2)}
+  50%{box-shadow:0 0 14px rgba(74,222,128,0.7),0 0 28px rgba(37,211,102,0.35)}
+}
+@keyframes neonPurple{
+  0%,100%{box-shadow:0 0 8px rgba(167,139,250,0.4),0 0 16px rgba(99,102,241,0.2)}
+  50%{box-shadow:0 0 14px rgba(167,139,250,0.7),0 0 28px rgba(99,102,241,0.35)}
+}
+.order-float{cursor:grab;touch-action:none;user-select:none}
+.order-float:active{cursor:grabbing}
+.order-float .drag-handle{cursor:grab;padding:2px 0;text-align:center;font-size:0.65rem;color:#a78bfa;opacity:0.8}
+
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🍳 <span id="kitchenTitle">Kitchen Tycoon</span></h1>
+  <p id="headerSub">Tap correct station • Serve fast!</p>
+</div>
+
+<div class="top-bar">
+  <button class="btn" onclick="toggleDiff()" id="diffBtn">⚡ <span id="diffLabel">Medium</span></button>
+  <select id="musicSel" onchange="changeMusic()" style="font-size:0.62rem;padding:3px 4px;border-radius:5px;background:#1c1c24;color:#fff;border:1px solid #334155">
+    <option value="off">🎵 Off</option>
+    <option value="kids">🎈 Kids</option>
+    <option value="indian">🇮🇳 Indian</option>
+    <option value="western">🇺🇸 Western</option>
+  </select>
+  <button class="btn" onclick="openTheme()">🎨 Theme</button>
+</div>
+
+<div class="score-bar">
+  <div>Score: <span id="score">0</span><span class="score-arrow" id="scoreArrow"></span></div>
+  <div>🏆 High: <span id="high">0</span></div>
+</div>
+<div class="social-toast" id="socialToast"></div>
+<div class="rank" id="rank">Rank: Kitchen Helper</div>
+
+<div class="order-box">
+  <div class="label" id="orderLabel">📱 ORDER INCOMING!</div>
+  <div class="dish" id="orderDish">🎂 Birthday Cake</div>
+  <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+</div>
+
+<div class="stations" id="stations"></div>
+<div class="visitor">👁️ Plays: <span id="plays">0</span></div>
+
+<div class="bottom">
+  <button class="btn" id="regionBtn" onclick="openRegion()">🌍 Region</button>
+  <button class="btn wa" onclick="shareWA()">WA</button>
+  <button class="btn share" onclick="shareSystem()">Share</button>
+  <button class="btn" onclick="openHowTo()">❓</button>
+</div>
+
+<!-- Floating Order Suggestion -->
+<div class="order-float" id="orderFloat">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <div class="neon-text" id="orderFloatText">कुछ ऑर्डर करना है?</div>
+    <button class="close-btn" id="orderCloseBtn" onclick="minimizeOrder()">−</button>
+  </div>
+  <div class="rotating-emoji" id="rotEmoji">🍕</div>
+  <div class="platform-text" id="platformText">Blinkit • Zomato • Swiggy</div>
+  <select id="orderSelect" onchange="goOrder(this.value)">
+    <option value="">Choose item / आइटम चुनें...</option>
+    <!-- ===== AFFILIATE LINKS - aap yahan apne links daal sakte ho ===== -->
+    <option value="https://www.blinkit.com">🥔 Aloo Bhujia → Blinkit</option>
+    <option value="https://www.swiggy.com">🥔 Aloo Bhujia → Swiggy</option>
+    <option value="https://www.zomato.com">🥔 Aloo Bhujia → Zomato</option>
+    <option value="https://www.blinkit.com">🌽 Kurkure → Blinkit</option>
+    <option value="https://www.swiggy.com">🌽 Kurkure → Swiggy</option>
+    <option value="https://www.blinkit.com">🍪 Biscuits → Blinkit</option>
+    <option value="https://www.swiggy.com">🍔 Pav Bhaji → Swiggy</option>
+    <option value="https://www.zomato.com">🍔 Pav Bhaji → Zomato</option>
+    <option value="https://www.swiggy.com">🍕 Pizza → Swiggy</option>
+    <option value="https://www.zomato.com">🍕 Pizza → Zomato</option>
+    <option value="https://www.swiggy.com">🍚 Biryani → Swiggy</option>
+    <option value="https://www.zomato.com">🍚 Biryani → Zomato</option>
+    <option value="https://www.blinkit.com">🥛 Milk / Dahi → Blinkit</option>
+    <option value="https://www.swiggy.com">🍦 Ice Cream → Swiggy</option>
+    <option value="https://www.zomato.com">🍦 Ice Cream → Zomato</option>
+    <option value="https://www.swiggy.com">🍛 Butter Chicken → Swiggy</option>
+    <option value="https://www.zomato.com">🍛 Butter Chicken → Zomato</option>
+  </select>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="ach" id="ach"></div>
+
+<!-- Registration -->
+<div class="modal show" id="regModal">
+  <div class="modal-box">
+    <h2>🍳 Kitchen Tycoon</h2>
+    <p id="authTitle">Create Account / Login</p>
+    
+    <div id="authTabs" style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn-main" style="flex:1;padding:8px;font-size:0.8rem;background:#334155" id="tabSignup" onclick="showAuth('signup')">Sign Up</button>
+      <button class="btn-main" style="flex:1;padding:8px;font-size:0.8rem;background:#334155" id="tabLogin" onclick="showAuth('login')">Login</button>
+    </div>
+
+    <div id="signupBox">
+      <div class="input-g"><label>Full Name</label><input type="text" id="pName" placeholder="Your name" maxlength="30"></div>
+      <div class="input-g"><label>Email</label><input type="email" id="pEmail" placeholder="you@email.com"></div>
+      <div class="input-g"><label>Phone</label><input type="tel" id="pPhone" placeholder="+91 98765 43210"></div>
+      <div class="input-g"><label>Password</label><input type="password" id="pPass" placeholder="Min 6 characters"></div>
+      <div class="input-g"><label>State / Country</label>
+        <select id="pState">
+          <option value="">Select</option>
+          <option>Delhi</option><option>Maharashtra</option><option>Karnataka</option><option>Tamil Nadu</option>
+          <option>Gujarat</option><option>Rajasthan</option><option>Uttar Pradesh</option><option>West Bengal</option>
+          <option>Punjab</option><option>USA</option><option>UK</option><option>Canada</option><option>Other</option>
+        </select>
+      </div>
+      <button class="btn-main" onclick="doSignup()">Sign Up & Play</button>
+    </div>
+
+    <div id="loginBox" style="display:none">
+      <div class="input-g"><label>Email or Phone</label><input type="text" id="loginId" placeholder="Email or Phone"></div>
+      <div class="input-g"><label>Password</label><input type="password" id="loginPass" placeholder="Password"></div>
+      <button class="btn-main" onclick="doLogin()">Login & Play</button>
+    </div>
+
+    <div style="margin:14px 0;text-align:center;color:#64748b;font-size:0.75rem">— OR —</div>
+    
+    <button class="btn-main" style="background:#fff;color:#333;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;gap:8px" onclick="googleSignIn()">
+      <span style="font-size:1.1rem">G</span> Continue with Google
+    </button>
+    <p style="font-size:0.65rem;color:#64748b;margin-top:10px">Demo mode: data saves in browser. Real Google/OTP needs Firebase backend.</p>
+  </div>
+</div>
+
+<!-- Region -->
+<div class="modal" id="regionModal">
+  <div class="modal-box">
+    <h2 id="regTitle">Choose Region</h2>
+    <button class="btn-main" onclick="setRegion('indian')">🇮🇳 Indian Kitchen</button>
+    <button class="btn-main" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);margin-top:8px" onclick="setRegion('intl')">🇺🇸 International Kitchen</button>
+    <div id="langBox" style="margin-top:12px;display:none">
+      <p>Language for Indian mode:</p>
+      <button class="btn-main" style="background:#334155;margin-top:4px" onclick="setLang('hindi')">हिंदी</button>
+      <button class="btn-main" style="background:#334155;margin-top:4px" onclick="setLang('hinglish')">Hinglish</button>
+    </div>
+  </div>
+</div>
+
+<!-- Difficulty -->
+<div class="modal" id="diffModal">
+  <div class="modal-box">
+    <h2>Difficulty / स्तर</h2>
+    <button class="btn-main" onclick="setDiff('easy')">🟢 Easy (zyada time)</button>
+    <button class="btn-main" style="background:#eab308;margin-top:6px" onclick="setDiff('medium')">🟡 Medium</button>
+    <button class="btn-main" style="background:#ef4444;margin-top:6px" onclick="setDiff('hard')">🔴 Hard (fast!)</button>
+  </div>
+</div>
+
+<!-- Theme -->
+<div class="modal" id="themeModal">
+  <div class="modal-box">
+    <h2>Colour Theme</h2>
+    <button class="btn-main" onclick="setTheme('default')">Default Orange</button>
+    <button class="btn-main" style="background:#f8c301;color:#000;margin-top:5px" onclick="setTheme('blinkit')">Blinkit</button>
+    <button class="btn-main" style="background:#fc8019;margin-top:5px" onclick="setTheme('swiggy')">Swiggy</button>
+    <button class="btn-main" style="background:#e23744;margin-top:5px" onclick="setTheme('zomato')">Zomato</button>
+    <button class="btn-main" style="background:#6b21a8;margin-top:5px" onclick="setTheme('instamart')">Instamart</button>
+    <button class="btn-main" style="background:#0b648f;margin-top:5px" onclick="setTheme('dominos')">Domino's</button>
+    <button class="btn-main" style="background:#ffc72c;color:#000;margin-top:5px" onclick="setTheme('mcdonalds')">McDonald's</button>
+    <button class="btn-main" style="background:#ee3a23;margin-top:5px" onclick="setTheme('pizzahut')">Pizza Hut</button>
+  </div>
+</div>
+
+<!-- Feedback -->
+<div class="modal" id="feedModal">
+  <div class="modal-box">
+    <h2>Feedback / सुझाव</h2>
+    <p>Kya aur dishes add karwana chahte ho? Ya koi suggestion?</p>
+    <textarea id="feedText" rows="3" style="width:100%;padding:8px;border-radius:8px;background:#0f0f13;color:#fff;border:1px solid #334155;font-size:0.8rem" placeholder="Apna feedback likho..."></textarea>
+    <button class="btn-main" onclick="submitFeed()">Submit</button>
+    <button class="btn-main" style="background:#334155;margin-top:5px" onclick="document.getElementById('feedModal').classList.remove('show')">Skip</button>
+  </div>
+</div>
+
+<!-- How to -->
+<div class="modal" id="howModal">
+  <div class="modal-box">
+    <h2>How to Play</h2>
+    <p style="text-align:left;font-size:0.73rem;line-height:1.4" id="howText">
+      • Order aayega upar<br>• Sahi station pe tap karo<br>• Time khatam = score kam<br>• Favorite dishes zyada aayengi
+    </p>
+    <button class="btn-main" onclick="document.getElementById('howModal').classList.remove('show')">Got it!</button>
+  </div>
+</div>
+
+<script>
+// ===== AFFILIATE LINKS PLACEHOLDER =====
+// Yahan apne real affiliate links daal sakte ho:
+// Example:
+// const AFFILIATE = {
+//   bhujia: "https://blinkit.com/your-affiliate-link",
+//   kurkure: "https://blinkit.com/...",
+//   pavbhaji: "https://swiggy.com/...",
+//   pizza: "https://zomato.com/..."
+// };
+// Phir orderSelect ke option value mein ye links use karo.
+
+const DISHES_IN = [
+  {name:'Chole Bhature',hname:'छोले भटूरे',icon:'🍲',stations:['chole'],pts:55},
+  {name:'Masala Dosa',hname:'मसाला डोसा',icon:'🥞',stations:['dosa'],pts:45},
+  {name:'Butter Chicken',hname:'बटर चिकन',icon:'🍛',stations:['butter'],pts:60},
+  {name:'Paneer Tikka',hname:'पनीर टिक्का',icon:'🍢',stations:['paneer'],pts:50},
+  {name:'Biryani',hname:'बिरयानी',icon:'🍚',stations:['biryani'],pts:55},
+  {name:'Samosa',hname:'समोसा',icon:'🥟',stations:['samosa'],pts:40},
+  {name:'Masala Chai',hname:'मसाला चाय',icon:'☕',stations:['chai'],pts:30},
+  {name:'Idli Sambar',hname:'इडली सांभर',icon:'🥘',stations:['idli'],pts:40},
+  {name:'Ice Cream',hname:'आइसक्रीम',icon:'🍦',stations:['icecream'],pts:40}
+];
+const DISHES_INTL = [
+  {name:'Birthday Cake',icon:'🎂',stations:['cake'],pts:55},
+  {name:'Cheese Pizza',icon:'🍕',stations:['pizza'],pts:55},
+  {name:'Burger',icon:'🍔',stations:['burger'],pts:45},
+  {name:'Pasta',icon:'🍝',stations:['pasta'],pts:50},
+  {name:'French Fries',icon:'🍟',stations:['fries'],pts:35},
+  {name:'Cold Coffee',icon:'🧋',stations:['coffee'],pts:40},
+  {name:'Donut',icon:'🍩',stations:['donut'],pts:40},
+  {name:'Club Sandwich',icon:'🥪',stations:['sandwich'],pts:40},
+  {name:'Ice Cream',icon:'🍦',stations:['icecream'],pts:50}
+];
+
+const STATIONS_IN = [
+  {id:'chole',name:'Chole Bhature',hname:'छोले भटूरे',icon:'🍲',img:'1f372'},
+  {id:'dosa',name:'Masala Dosa',hname:'मसाला डोसा',icon:'🥞',img:'1f95e'},
+  {id:'butter',name:'Butter Chicken',hname:'बटर चिकन',icon:'🍛',img:'1f35b'},
+  {id:'paneer',name:'Paneer Tikka',hname:'पनीर टिक्का',icon:'🍢',img:'1f362'},
+  {id:'biryani',name:'Biryani',hname:'बिरयानी',icon:'🍚',img:'1f35a'},
+  {id:'samosa',name:'Samosa',hname:'समोसा',icon:'🥟',img:'1f95f'},
+  {id:'chai',name:'Masala Chai',hname:'मसाला चाय',icon:'☕',img:'2615'},
+  {id:'idli',name:'Idli Sambar',hname:'इडली सांभर',icon:'🥘',img:'1f958'},
+  {id:'icecream',name:'Ice Cream',hname:'आइसक्रीम',icon:'🍦',img:'1f366'}
+];
+const STATIONS_INTL = [
+  {id:'cake',name:'Birthday Cake',icon:'🎂'},
+  {id:'pizza',name:'Cheese Pizza',icon:'🍕'},
+  {id:'burger',name:'Burger',icon:'🍔'},
+  {id:'pasta',name:'Pasta',icon:'🍝'},
+  {id:'fries',name:'French Fries',icon:'🍟'},
+  {id:'coffee',name:'Cold Coffee',icon:'🧋'},
+  {id:'donut',name:'Donut',icon:'🍩'},
+  {id:'sandwich',name:'Club Sandwich',icon:'🥪'},
+  {id:'icecream',name:'Ice Cream',icon:'🍦'}
+];
+
+const RANKS=[{min:0,t:'Kitchen Helper',ht:'किचन हेल्पर'},{min:150,t:'Junior Chef',ht:'जूनियर शेफ'},{min:400,t:'Chef',ht:'शेफ'},{min:800,t:'Sous Chef',ht:'सू शेफ'},{min:1500,t:'Executive Chef',ht:'एग्जीक्यूटिव शेफ'},{min:3000,t:'Head Chef',ht:'हेड शेफ'},{min:5000,t:'Master Chef 👑',ht:'मास्टर शेफ 👑'}];
+const ACHIEVE=[100,200,350,500,750,1000,1500,2000,3000];
+
+let score=0,high=0,current=null,timer=0,maxT=8,running=false;
+let region='indian',diff='medium',lang='hinglish',theme='default';
+let name='',state='',favs=[],plays=0,startTime=Date.now(),feedShown=false,orderShown=false;
+let melInterval=null;
+
+// ===== AUDIO (simple free melodies) =====
+let actx=null;
+function initA(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}
+function tone(f,t,d,v=0.09){if(!actx)return;const o=actx.createOscillator(),g=actx.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d)}
+function sfxOk(){initA();tone(523,'sine',0.07,0.1);setTimeout(()=>tone(659,'sine',0.08,0.09),55);setTimeout(()=>tone(784,'sine',0.1,0.07),110)}
+function sfxNo(){initA();tone(180,'sawtooth',0.11,0.08);setTimeout(()=>tone(140,'sawtooth',0.14,0.06),70)}
+function sfxOrd(){initA();tone(440,'triangle',0.07,0.08);setTimeout(()=>tone(554,'triangle',0.09,0.07),60)}
+function sfxAch(){initA();[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,'square',0.09,0.07),i*65))}
+function sfxClick(){initA();tone(600,'sine',0.03,0.045)}
+const MELODIES={kids:[523,587,659,698,784,698,659,587],indian:[523,587,659,784,880,784,659,587,523,440],western:[659,698,784,880,784,698,659,587]};
+function playMelody(type){stopMelody();if(type==='off'||!MELODIES[type])return;initA();let i=0;const n=MELODIES[type];melInterval=setInterval(()=>{tone(n[i%n.length],'sine',0.22,0.035);i++},360)}
+function stopMelody(){if(melInterval){clearInterval(melInterval);melInterval=null}}
+function changeMusic(){const v=document.getElementById('musicSel').value;playMelody(v);sfxClick()}
+
+// ===== SAVE =====
+function save(){localStorage.setItem('kitG3',JSON.stringify({high,name,state,region,diff,lang,theme,favs}))}
+function load(){
+  try{const d=JSON.parse(localStorage.getItem('kitG3'));if(d){high=d.high||0;name=d.name||'';state=d.state||'';region=d.region||'indian';diff=d.diff||'medium';lang=d.lang||'hinglish';theme=d.theme||'default';favs=d.favs||[]}}catch(e){}
+  plays=parseInt(localStorage.getItem('kitPlays3')||'0')+1;localStorage.setItem('kitPlays3',plays);
+  document.getElementById('plays').textContent=plays;document.getElementById('high').textContent=high;
+  document.getElementById('diffLabel').textContent=diff.charAt(0).toUpperCase()+diff.slice(1);
+  if(theme!=='default')document.body.classList.add('theme-'+theme);
+}
+
+// ===== UI TEXT =====
+function t(en,hi,hin){ // english, hindi, hinglish
+  if(region!=='indian')return en;
+  return lang==='hindi'?hi:(hin||en);
+}
+
+// ===== GAME =====
+function getDishes(){
+  let list = region==='indian'? [...DISHES_IN] : [...DISHES_INTL];
+  // Favorite dishes appear more
+  if(favs.length){
+    const extra=[];
+    favs.forEach(f=>{
+      const found=list.find(d=>d.name===f);
+      if(found){extra.push(found,found,found)}
+    });
+    list=list.concat(extra);
+  }
+  return list;
+}
+function getStations(){return region==='indian'?STATIONS_IN:STATIONS_INTL}
+
+function renderStations(){
+  const el=document.getElementById('stations');el.innerHTML='';
+  getStations().forEach(s=>{
+    const d=document.createElement('div');d.className='station';
+    const nm = region==='indian'?(lang==='hindi'?s.hname:s.name):s.name;
+    let iconHtml = s.icon;
+    if(region==='indian' && s.img){
+      iconHtml = `<img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${s.img}.png" alt='${s.name}' loading='lazy'>`;
+    }
+    d.innerHTML=`<div class="station-icon">${iconHtml}</div><div class="station-name">${nm}</div>`;
+    d.onclick=()=>tap(s.id);el.appendChild(d);
+  });
+}
+function newOrder(){
+  const list=getDishes();
+  current=list[Math.floor(Math.random()*list.length)];
+  const base=diff==='easy'?11:diff==='hard'?5:7.5;
+  maxT=base+Math.random()*1.8;timer=maxT;
+  const nm = region==='indian'?(lang==='hindi'?current.hname:current.name):current.name;
+  let orderIcon = current.icon;
+  if(region==='indian'){
+    const st = STATIONS_IN.find(x => x.id === current.stations[0]);
+    if(st && st.img){
+      orderIcon = `<img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${st.img}.png" style="width:36px;height:36px;vertical-align:middle;margin-right:6px" alt=''>`;
+    }
+  }
+  document.getElementById('orderDish').innerHTML=`${orderIcon} ${nm}`;
+  document.getElementById('orderLabel').textContent=t('📱 ORDER INCOMING!','📱 ऑर्डर आ गया!','📱 ORDER INCOMING!');
+  document.getElementById('timerFill').style.width='100%';
+  sfxOrd();running=true;
+}
+function tap(id){
+  if(!running||!current)return;sfxClick();
+  if(current.stations.includes(id)){
+    const pts=current.pts+Math.floor(timer*4);
+    score+=pts;
+    animateScore(true, pts);
+    showToast(`✅ +${pts} ${current.icon}`);sfxOk();
+    if(score>high){high=score;document.getElementById('high').textContent=high;save()}
+    updateRank();checkAch();if(Math.random()<0.4)setTimeout(showSocial,800);running=false;setTimeout(newOrder,500);
+  }else{
+    score=Math.max(0,score-12);
+    animateScore(false, 12);
+    showToast(t('❌ Wrong! -12','❌ गलत! -12','❌ Wrong! -12'));sfxNo();
+  }
+}
+function updateRank(){
+  let r=RANKS[0];for(const x of RANKS)if(score>=x.min)r=x;
+  document.getElementById('rank').textContent='Rank: '+(region==='indian'&&lang==='hindi'?r.ht:r.t);
+}
+function checkAch(){
+  for(const m of ACHIEVE){
+    if(score>=m && score-70<m){showAch(`🏆 ${m} Score!`);sfxAch();break}
+  }
+}
+function showAch(msg){const a=document.getElementById('ach');a.textContent=msg;a.classList.add('show');setTimeout(()=>a.classList.remove('show'),2000)}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+
+
+const FAKE_PLAYERS = [
+  {n:'Arav', s:1250},{n:'Priya', s:980},{n:'Ananya', s:1540},{n:'Rohan', s:870},
+  {n:'Sneha', s:1120},{n:'Emma', s:1340},{n:'Vikram', s:760},{n:'Isha', s:1450},
+  {n:'Kabir', s:920},{n:'Meera', s:1680},{n:'Jake', s:1100},{n:'Aisha', s:1290}
+];
+function animateScore(up, pts){
+  const el = document.getElementById('score');
+  const arrow = document.getElementById('scoreArrow');
+  el.textContent = score;
+  el.classList.remove('score-up','score-down');
+  arrow.classList.remove('show');
+  void el.offsetWidth; // reflow
+  if(up){
+    el.classList.add('score-up');
+    arrow.textContent = ' ▲';
+    arrow.style.color = '#22c55e';
+  } else {
+    el.classList.add('score-down');
+    arrow.textContent = ' ▼';
+    arrow.style.color = '#ef4444';
+  }
+  arrow.classList.add('show');
+  setTimeout(()=>{el.classList.remove('score-up','score-down');arrow.classList.remove('show')},900);
+}
+function showSocial(){
+  if(Math.random() > 0.35) return;
+  const p = FAKE_PLAYERS[Math.floor(Math.random()*FAKE_PLAYERS.length)];
+  const t = document.getElementById('socialToast');
+  t.innerHTML = `<span class="name">${p.n}</span> ne <b>${p.s}</b> high score kiya! 🔥`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+// LOOP + TIMED EVENTS
+let last=performance.now();
+function loop(n){
+  const dt=(n-last)/1000;last=n;
+  if(running&&current){
+    timer-=dt;document.getElementById('timerFill').style.width=Math.max(0,timer/maxT*100)+'%';
+    if(timer<=0){running=false;score=Math.max(0,score-18);
+      animateScore(false, 18);
+      showToast(t('⏰ Time over! -18','⏰ समय खत्म! -18','⏰ Time over! -18'));sfxNo();setTimeout(newOrder,650)}
+  }
+  // Bore message (Indian mode)
+  const played=(Date.now()-startTime)/1000;
+  if(played>8&&played<12&&!orderShown){ showOrderFloat(true,true); orderShown=true; }
+  if(region==='indian'&&played>180&&played<185){ // ~3 min
+    document.getElementById('regionBtn').classList.add('highlight');
+    document.body.classList.add('flash-blue');
+    showToast(t('Try International Kitchen?','इंटरनेशनल किचन ट्राई करें?','International Kitchen try karein?'));
+    setTimeout(()=>{document.body.classList.remove('flash-blue')},4000);
+  }
+  // Order suggestion flashes
+  if(played>420&&orderMinimized){ // 7 min - bring back if minimized
+    showOrderFloat(true, true);
+  }
+  if(played>600 && orderMinimized){ // 10 min - show again if minimized
+    showOrderFloat(true, true);
+  }
+  // Feedback after 12 min
+  if(played>720&&!feedShown){feedShown=true;document.getElementById('feedModal').classList.add('show')}
+  requestAnimationFrame(loop);
+}
+
+const FOOD_EMOJIS = ['🍕','🍔','🍟','🍦','🍪','🌽','🥔','🥤','🍰','🍩','☕','🧁'];
+const PLATFORMS = ['Blinkit 🟡','Zomato 🔴','Swiggy 🟠','Instamart 🟣','Domino\'s 🔵','McDonald\'s 🟡'];
+let rotInterval = null;
+let orderMinimized = false;
+
+function showOrderFloat(show, forceBig=false){
+  const f = document.getElementById('orderFloat');
+  if(show){
+    f.classList.add('show');
+    if(forceBig || !orderMinimized){
+      f.classList.remove('minimized');
+      document.getElementById('orderCloseBtn').textContent = '−';
+    }
+    startRotating();
+  } else {
+    f.classList.remove('show');
+    stopRotating();
+  }
+  document.getElementById('orderFloatText').textContent = t('Order Now!','ऑर्डर करें','Order Now!');
+}
+function minimizeOrder(){
+  const f = document.getElementById('orderFloat');
+  if(f.classList.contains('minimized')){
+    // restore big
+    f.classList.remove('minimized');
+    document.getElementById('orderCloseBtn').textContent = '−';
+    orderMinimized = false;
+  } else {
+    // minimize
+    f.classList.add('minimized');
+    document.getElementById('orderCloseBtn').textContent = '✕';
+    orderMinimized = true;
+  }
+}
+function startRotating(){
+  stopRotating();
+  let i = 0;
+  rotInterval = setInterval(()=>{
+    document.getElementById('rotEmoji').textContent = FOOD_EMOJIS[i % FOOD_EMOJIS.length];
+    document.getElementById('platformText').textContent = PLATFORMS[i % PLATFORMS.length];
+    i++;
+  }, 1000);
+}
+function stopRotating(){ if(rotInterval){ clearInterval(rotInterval); rotInterval=null; } }
+
+function goOrder(url){if(url)window.open(url,'_blank')}
+
+// ===== ACTIONS =====
+function showAuth(mode){
+  document.getElementById('signupBox').style.display = mode==='signup'?'block':'none';
+  document.getElementById('loginBox').style.display = mode==='login'?'block':'none';
+  document.getElementById('tabSignup').style.background = mode==='signup'?'var(--primary)':'#334155';
+  document.getElementById('tabLogin').style.background = mode==='login'?'var(--primary)':'#334155';
+}
+function startGameAfterAuth(n, s){
+  name=n; state=s||'';
+  favs=[]; save();
+  document.getElementById('kitchenTitle').textContent = "Kitchen Tycoon";
+  document.title = "Kitchen Tycoon";
+  document.getElementById('regModal').classList.remove('show');
+  initA(); renderStations(); newOrder(); requestAnimationFrame(loop); sfxClick();
+  console.log('Player:',{name,state,plays});
+}
+function doSignup(){
+  const n=document.getElementById('pName').value.trim();
+  const email=document.getElementById('pEmail').value.trim();
+  const phone=document.getElementById('pPhone').value.trim();
+  const pass=document.getElementById('pPass').value;
+  const s=document.getElementById('pState').value;
+  if(!n||n.length<2){showToast('Name required');return}
+  if(!email && !phone){showToast('Email or Phone required');return}
+  if(!pass||pass.length<6){showToast('Password min 6 chars');return}
+  // Demo: save user locally
+  const users = JSON.parse(localStorage.getItem('ktUsers')||'{}');
+  const key = email || phone;
+  if(users[key]){showToast('Account exists. Please Login');return}
+  users[key] = {name:n, email, phone, pass, state:s};
+  localStorage.setItem('ktUsers', JSON.stringify(users));
+  startGameAfterAuth(n, s);
+}
+function doLogin(){
+  const id=document.getElementById('loginId').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!id||!pass){showToast('Enter email/phone & password');return}
+  const users = JSON.parse(localStorage.getItem('ktUsers')||'{}');
+  const u = users[id];
+  if(!u || u.pass !== pass){showToast('Wrong email/phone or password');return}
+  startGameAfterAuth(u.name, u.state);
+}
+function googleSignIn(){
+  // Demo Google Sign-In (real one needs Firebase/Google Client ID)
+  showToast('Demo Google Login...');
+  setTimeout(()=>{
+    startGameAfterAuth('Google User', 'Demo');
+  }, 800);
+}
+function register(){ doSignup(); } // fallback
+
+function setRegion(r){
+  region=r;save();
+  document.getElementById('regionModal').classList.remove('show');
+  document.getElementById('regionBtn').classList.remove('highlight');
+  if(r==='indian'){document.getElementById('langBox').style.display='block'}
+  else{document.getElementById('langBox').style.display='none';lang='hinglish'}
+  renderStations();newOrder();
+  showToast(r==='indian'?'🇮🇳 Indian mode':'🇺🇸 International mode');
+}
+function setLang(l){lang=l;save();document.getElementById('regionModal').classList.remove('show');renderStations();newOrder();showToast(l==='hindi'?'भाषा: हिंदी':'Language: Hinglish')}
+function setDiff(d){diff=d;document.getElementById('diffLabel').textContent=d.charAt(0).toUpperCase()+d.slice(1);save();document.getElementById('diffModal').classList.remove('show');showToast('Difficulty: '+d)}
+function setTheme(th){
+  document.body.className='';
+  if(th!=='default')document.body.classList.add('theme-'+th);
+  theme=th;save();document.getElementById('themeModal').classList.remove('show');sfxClick();
+}
+function openRegion(){document.getElementById('regionModal').classList.add('show');if(region==='indian')document.getElementById('langBox').style.display='block'}
+function toggleDiff(){document.getElementById('diffModal').classList.add('show')}
+function openTheme(){document.getElementById('themeModal').classList.add('show')}
+function openHowTo(){document.getElementById('howModal').classList.add('show')}
+function shareWA(){
+  const title=name?name.split(' ')[0]+"'s Kitchen Tycoon":'Kitchen Tycoon';
+  const text=`🍳 Main ${title} khel raha hoon!\nScore: ${score} | High: ${high}\nKhelo: ${location.href}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+}
+function shareSystem(){
+  const title=name?name.split(' ')[0]+"'s Kitchen Tycoon":'Kitchen Tycoon';
+  if(navigator.share){
+    navigator.share({title,text:`Score: ${score} | High: ${high}`,url:location.href}).catch(()=>{});
+  }else{shareWA()}
+}
+function submitFeed(){
+  const txt=document.getElementById('feedText').value.trim();
+  if(txt){
+    const feeds=JSON.parse(localStorage.getItem('kitFeeds')||'[]');
+    feeds.push({name,state,text:txt,time:new Date().toISOString()});
+    localStorage.setItem('kitFeeds',JSON.stringify(feeds));
+    console.log('FEEDBACK:',feeds);
+    showToast('Thanks for feedback!');
+  }
+  document.getElementById('feedModal').classList.remove('show');
+}
+
+
+(function(){
+  let dragging=false, ox=0, oy=0;
+  const box = () => document.getElementById('orderFloat');
+  function startDrag(e){
+    const f=box(); if(!f || !f.classList.contains('show')) return;
+    if(e.target.tagName==='SELECT' || e.target.tagName==='BUTTON' || e.target.closest('button')) return;
+    dragging=true;
+    const rect=f.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    ox = clientX - rect.left; oy = clientY - rect.top;
+    f.style.transition = 'none';
+  }
+  function moveDrag(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const f=box();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    let left = clientX - ox; let top = clientY - oy;
+    left = Math.max(0, Math.min(left, window.innerWidth - f.offsetWidth));
+    top = Math.max(0, Math.min(top, window.innerHeight - f.offsetHeight));
+    f.style.left = left + 'px'; f.style.top = top + 'px';
+    f.style.right = 'auto'; f.style.bottom = 'auto'; f.style.transform = 'none';
+  }
+  function endDrag(){ dragging=false; }
+  document.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', moveDrag);
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchstart', startDrag, {passive:false});
+  document.addEventListener('touchmove', moveDrag, {passive:false});
+  document.addEventListener('touchend', endDrag);
+})();
+
+// INIT
+load();
+if(name&&state){
+  document.getElementById('regModal').classList.remove('show');
+  const title="Kitchen Tycoon";
+  document.getElementById("kitchenTitle").textContent="Kitchen Tycoon";document.title="Kitchen Tycoon";
+  if(theme!=='default')document.body.classList.add('theme-'+theme);
+  renderStations();newOrder();requestAnimationFrame(loop);
+}else{
+  document.getElementById('regModal').classList.add('show');
+}
+</script>
+</body>
+</html>
